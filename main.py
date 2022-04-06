@@ -1,14 +1,9 @@
-#===============================================================================
-# Exemplo: segmentação de uma imagem em escala de cinza.
-#-------------------------------------------------------------------------------
-# Autor: Bogdan T. Nassu
+
+# Autores: Gabriel Baumgarten e Henrique Da Gama
 # Universidade Tecnológica Federal do Paraná
 #===============================================================================
 
-from cProfile import label
-from calendar import calendar
 import sys
-import timeit
 import numpy as np
 import cv2
 import math
@@ -152,21 +147,22 @@ def filtro_integral(img):
                 soma = 0
 
                 if coluna-janela-1 >0:
-                    soma -= img_buffer[linha+janela][coluna-janela-1]
+                    soma -= img_buffer[linha+janela if linha+janela < img.shape[0] else img.shape[0]-1][coluna-janela-1]
                 else:
-                    soma -= img_buffer[linha+janela][coluna-janela]
+                    soma -= img_buffer[linha+janela if linha+janela < img.shape[0] else img.shape[0]-1][coluna-janela if coluna-janela >= 0 else 0]
 
                 if linha-janela-1 >0:
-                    soma -= img_buffer[linha-janela-1][coluna+janela]
+                    soma -= img_buffer[linha-janela-1][coluna+janela if coluna+janela < img.shape[1] else img.shape[1]-1]
                 else:
-                    soma -= img_buffer[linha-janela][coluna+janela]
+                    soma -= img_buffer[linha-janela if linha-janela >= 0 else 0 ][coluna+janela if coluna+janela < img.shape[1] else img.shape[1]-1]
 
                 if coluna-janela-1 >0 and linha-janela-1 >0:
                     soma += img_buffer[linha-janela-1][coluna-janela-1]
                 else:
-                    soma += img_buffer[linha-janela][coluna-janela]
+                    soma += img_buffer[linha-janela if linha-janela >= 0 else 0][coluna-janela if coluna-janela >= 0 else 0]
 
-                soma += img_buffer[linha+janela][coluna+janela]
+                soma += img_buffer[linha+janela if linha+janela < img.shape[0] else img.shape[0]-1][coluna+janela if coluna+janela < img.shape[1] else img.shape[1]-1]
+
 
                 img_saida[linha][coluna] = soma/(WINDOW_SIZE*WINDOW_SIZE)
     else:
@@ -192,26 +188,26 @@ def filtro_integral(img):
 
             janela = math.floor(WINDOW_SIZE/2)
 
-            for linha in range(janela, img.shape[0] - janela ):
-                for coluna in range(janela, img.shape[1] - janela ):
+            for linha in range( img.shape[0]  ):
+                for coluna in range( img.shape[1] ):
                     soma = 0
 
                     if coluna-janela-1 >0:
-                        soma -= img_buffer[linha+janela][coluna-janela-1][canal]
+                        soma -= img_buffer[linha+janela if linha+janela < img.shape[0] else img.shape[0]-1][coluna-janela-1][canal]
                     else:
-                        soma -= img_buffer[linha+janela][coluna-janela][canal]
+                        soma -= img_buffer[linha+janela if linha+janela < img.shape[0] else img.shape[0]-1][coluna-janela if coluna-janela >= 0 else 0][canal]
 
                     if linha-janela-1 >0:
-                        soma -= img_buffer[linha-janela-1][coluna+janela][canal]
+                        soma -= img_buffer[linha-janela-1][coluna+janela if coluna+janela < img.shape[1] else img.shape[1]-1][canal]
                     else:
-                        soma -= img_buffer[linha-janela][coluna+janela][canal]
+                        soma -= img_buffer[linha-janela if linha-janela >= 0 else 0 ][coluna+janela if coluna+janela < img.shape[1] else img.shape[1]-1][canal]
 
                     if coluna-janela-1 >0 and linha-janela-1 >0:
                         soma += img_buffer[linha-janela-1][coluna-janela-1][canal]
                     else:
-                        soma += img_buffer[linha-janela][coluna-janela][canal]
+                        soma += img_buffer[linha-janela if linha-janela >= 0 else 0][coluna-janela if coluna-janela >= 0 else 0][canal]
 
-                    soma += img_buffer[linha+janela][coluna+janela][canal]
+                    soma += img_buffer[linha+janela if linha+janela < img.shape[0] else img.shape[0]-1][coluna+janela if coluna+janela < img.shape[1] else img.shape[1]-1][canal]
 
                     img_saida[linha][coluna][canal] = soma/(WINDOW_SIZE*WINDOW_SIZE)
 
